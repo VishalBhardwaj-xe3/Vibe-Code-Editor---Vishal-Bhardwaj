@@ -10,7 +10,8 @@ export const getPlaygroundById = async (id: string) => {
   try {
     const playground = await db.playground.findUnique({
       where: { id },
-        select: {
+      select: {
+          title:true,
             templateFiles: {
                 select: {
                   content:true
