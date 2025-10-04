@@ -64,12 +64,12 @@ model Playground {
   title String
   description String?
   template Templates @default(REACT)
+  templateFiles TemplateFile[]
   craetedAt DateTime @default(now())
   updateAt DateTime @updatedAt
   StarMark StarMark[]
   userid String
   user User @relation(fields: [userid], references: [id], onDelete:Cascade)
-  // todo templateFiles
 }
 
 model StarMark{
@@ -82,4 +82,13 @@ model StarMark{
   playground Playground @relation(fields:[playgroundId], references: [id], onDelete:Cascade)
 
   @@unique([userId, playgroundId])
+}
+
+model TemplateFile {
+  id           String     @id @default(cuid()) @map("_id")
+  content      Json
+  craetedAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  playgroundId String     @unique
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
 }
