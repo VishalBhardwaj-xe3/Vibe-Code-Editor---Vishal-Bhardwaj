@@ -576,7 +576,10 @@ export const PlaygroundEditor = ({
         inlineCompletionProviderRef.current.dispose();
         inlineCompletionProviderRef.current = null;
       }
-      if (tabCommandRef.current) {
+      if (
+        tabCommandRef.current &&
+        typeof tabCommandRef.current.dispose === "function"
+      ) {
         tabCommandRef.current.dispose();
         tabCommandRef.current = null;
       }
