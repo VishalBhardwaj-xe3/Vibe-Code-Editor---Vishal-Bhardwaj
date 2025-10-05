@@ -22,8 +22,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { LoadingStep } from "@/modules/playground/components/loader";
-import PlaygroundEditor from "@/modules/playground/components/playground-editor";
+import {PlaygroundEditor} from "@/modules/playground/components/playground-editor";
 import { TemplateFileTree } from "@/modules/playground/components/playground-explorer";
+import ToggleAI from "@/modules/playground/components/toggle-ai";
+import { useAISuggestions } from "@/modules/playground/hooks/useAISuggestion";
 import { useFileExplorer } from "@/modules/playground/hooks/useFileExplorer";
 import { usePlayground } from "@/modules/playground/hooks/usePlayground";
 import { findFilePath } from "@/modules/playground/lib";
@@ -49,10 +51,12 @@ import { toast } from "sonner";
 
 const MainPlaygroundpage = () => {
   const { id } = useParams<{ id: string }>();
-  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(true);
 
   const { playgroundData, templateData, isLoading, error, saveTemplateData } =
     usePlayground(id);
+  
+   const aiSuggestions = useAISuggestions();
 
   const {
     setTemplateData,
@@ -377,9 +381,7 @@ const MainPlaygroundpage = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => handleSave()}
-                      disabled={
-                        (!activeFile || !activeFile.hasUnsavedChanges)
-                      }
+                      disabled={!activeFile || !activeFile.hasUnsavedChanges}
                     >
                       <Save className="h-4 w-4" />
                     </Button>
@@ -401,9 +403,11 @@ const MainPlaygroundpage = () => {
                   <TooltipContent>Save All (Ctrl+Shift+S)</TooltipContent>
                 </Tooltip>
 
-                <Button variant={"default"} size={"icon"}>
-                  <Bot className="size-4" />
-                </Button>
+                <ToggleAI
+                  isEnabled={aiSuggestions.isEnabled}
+                  onToggle={aiSuggestions.toggleEnabled}
+                  suggestionLoading={aiSuggestions.isLoading}
+                />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -488,7 +492,21 @@ const MainPlaygroundpage = () => {
                       <PlaygroundEditor
                         activeFile={activeFile}
                         content={activeFile?.content || ""}
-                        onContentChange={(value) => activeFileId && updateFileContent(activeFileId, value)}
+                        onContentChange={(value) =>
+                          activeFileId && updateFileContent(activeFileId, value)
+                        }
+                        suggestion={aiSuggestions.suggestion}
+                        suggestionLoading={aiSuggestions.isLoading}
+                        suggestionPosition={aiSuggestions.position}
+                        onAcceptSuggestion={(editor, monaco) =>
+                          aiSuggestions.acceptSuggestion(editor, monaco)
+                        }
+                        onRejectSuggestion={(editor) =>
+                          aiSuggestions.rejectSuggestion(editor)
+                        }
+                        onTriggerSuggestion={(type, editor) =>
+                          aiSuggestions.fetchSuggestion(type, editor)
+                        }
                       />
                     </ResizablePanel>
                     {isPreviewVisible && (
