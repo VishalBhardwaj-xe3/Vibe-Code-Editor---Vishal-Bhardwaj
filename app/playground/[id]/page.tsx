@@ -223,8 +223,8 @@ const MainPlaygroundpage = () => {
         }
 
         // Use saveTemplateData to persist changes
-        // const newTemplateData = await saveTemplateData(updatedTemplateData);
-        // setTemplateData(newTemplateData || updatedTemplateData);
+        const newTemplateData = await saveTemplateData(updatedTemplateData);
+        setTemplateData(newTemplateData || updatedTemplateData);
 
         // Update open files
         const updatedOpenFiles = openFiles.map((f) =>
