@@ -8,11 +8,9 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { WebLinksAddon } from "xterm-addon-web-links";
-import { SearchAddon } from "xterm-addon-search";
-import "xterm/css/xterm.css";
+// xterm and its addons are browser-only and can throw during server-side
+// evaluation (ReferenceError: self is not defined). Dynamically import them
+// inside the client lifecycle to avoid server-side module evaluation.
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Copy, Trash2, Download } from "lucide-react";
@@ -38,9 +36,10 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
     ref
   ) => {
     const terminalRef = useRef<HTMLDivElement>(null);
-    const term = useRef<Terminal | null>(null);
-    const fitAddon = useRef<FitAddon | null>(null);
-    const searchAddon = useRef<SearchAddon | null>(null);
+  // Use "any" for these refs since the types come from a dynamic import.
+  const term = useRef<any | null>(null);
+  const fitAddon = useRef<any | null>(null);
+  const searchAddon = useRef<any | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [showSearch, setShowSearch] = useState(false);
@@ -295,10 +294,29 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       [executeCommand, writePrompt]
     );
 
-    const initializeTerminal = useCallback(() => {
+    const initializeTerminal = useCallback(async () => {
       if (!terminalRef.current || term.current) return;
 
-      const terminal = new Terminal({
+      // Dynamically import xterm and addons only on the client.
+      const [{ Terminal: XTerm }, FitMod, WebLinksMod, SearchMod] = await Promise.all([
+        import("xterm"),
+        import("xterm-addon-fit"),
+        import("xterm-addon-web-links"),
+        import("xterm-addon-search"),
+      ]);
+
+      // Load xterm CSS dynamically so it doesn't run on the server.
+      try {
+        // TypeScript may complain about importing CSS from a dynamic import.
+        // Ignore the error; the import is safe at runtime in the browser.
+        // @ts-ignore
+        await import("xterm/css/xterm.css");
+      } catch (e) {
+        // Ignore CSS load errors in environments that don't support it.
+        // The terminal will still function.
+      }
+
+      const terminal = new XTerm({
         cursorBlink: true,
         fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
         fontSize: 14,
@@ -311,10 +329,10 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
         tabStopWidth: 4,
       });
 
-      // Add addons
-      const fitAddonInstance = new FitAddon();
-      const webLinksAddon = new WebLinksAddon();
-      const searchAddonInstance = new SearchAddon();
+      // Create addon instances
+      const fitAddonInstance = new FitMod.FitAddon();
+      const webLinksAddon = new WebLinksMod.WebLinksAddon();
+      const searchAddonInstance = new SearchMod.SearchAddon();
 
       terminal.loadAddon(fitAddonInstance);
       terminal.loadAddon(webLinksAddon);
