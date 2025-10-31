@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-
 import {
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
@@ -8,14 +7,8 @@ import {
 } from "@/routes";
 import authConfig from "./auth.config";
 
-// Ensure middleware running on Vercel has correct site URL and secret available.
-if (!process.env.NEXTAUTH_URL && process.env.AUTH_URL) {
-  process.env.NEXTAUTH_URL = `https://${process.env.AUTH_URL}`;
-}
-
-if (!process.env.NEXTAUTH_SECRET && process.env.AUTH_SECRET) {
-  process.env.NEXTAUTH_SECRET = process.env.AUTH_SECRET;
-}
+// We have removed the old environment variable fallbacks.
+// The middleware will get the correct config from the main `auth` export.
 
 const { auth } = NextAuth(authConfig);
 
@@ -24,15 +17,16 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
+  // Your routing logic here is perfectly correct.
+  // 1. Allow API auth routes
   if (isApiAuthRoute) {
     return null;
   }
 
+  // 2. Redirect logged-in users away from auth pages
   if (isAuthRoute) {
     if (isLoggedIn) {
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
@@ -40,14 +34,16 @@ export default auth((req) => {
     return null;
   }
 
+  // 3. Protect all other routes
   if (!isLoggedIn && !isPublicRoute) {
     return Response.redirect(new URL("/auth/sign-in", nextUrl));
   }
 
+  // 4. Allow access
   return null;
 });
 
+// Your matcher is correct.
 export const config = {
-  // copied from clerk
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
