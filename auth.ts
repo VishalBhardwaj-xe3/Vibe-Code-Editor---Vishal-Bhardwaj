@@ -4,6 +4,16 @@ import { db } from "./lib/db";
 import authConfig from "./auth.config";
 import { getUserById } from "./modules/auth/action";
 
+// Runtime fallbacks to make deployment on Vercel more resilient:
+// - If NEXTAUTH_URL isn't set, use VERCEL_URL to build it (prevents UntrustedHost)
+// - If NEXTAUTH_SECRET isn't set, fall back to AUTH_SECRET
+if (!process.env.NEXTAUTH_URL && process.env.VERCEL_URL) {
+  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+}
+
+if (!process.env.NEXTAUTH_SECRET && process.env.AUTH_SECRET) {
+  process.env.NEXTAUTH_SECRET = process.env.AUTH_SECRET;
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
@@ -91,7 +101,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
+  // Prefer NEXTAUTH_SECRET (Vercel standard). Fall back to AUTH_SECRET for compatibility.
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   ...authConfig,
