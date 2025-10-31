@@ -7,8 +7,8 @@ import { getUserById } from "./modules/auth/action";
 // Runtime fallbacks to make deployment on Vercel more resilient:
 // - If NEXTAUTH_URL isn't set, use VERCEL_URL to build it (prevents UntrustedHost)
 // - If NEXTAUTH_SECRET isn't set, fall back to AUTH_SECRET
-if (!process.env.NEXTAUTH_URL && process.env.VERCEL_URL) {
-  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+if (!process.env.NEXTAUTH_URL && process.env.AUTH_URL) {
+  process.env.NEXTAUTH_URL = `https://${process.env.AUTH_URL}`;
 }
 
 if (!process.env.NEXTAUTH_SECRET && process.env.AUTH_SECRET) {
