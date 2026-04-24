@@ -1,0 +1,14 @@
+2025-10-02T16:24:58.128Z [INFO] ----------------------invoke list_jdks----------------------
+2025-10-02T16:24:58.130Z [INFO] [Tool.invoke]({name: list_jdks, input: {
+  "version": "21",
+  "projectPath": "c:\\Users\\HP\\Projects\\VibeCodeEditor-VishalBhardwaj"
+}}).
+2025-10-02T16:24:58.132Z [INFO] [Task.start](): Starting task toolCall
+2025-10-02T16:24:58.133Z [INFO] [Task.start](): Started task toolCall
+2025-10-02T16:24:58.133Z [INFO] [Tool.invoke] validate GitHub Copilot license.
+2025-10-02T16:26:15.812Z [INFO] Copilot user info:undefined
+2025-10-02T16:26:15.813Z [WARN] "GitHub Copilot app modernization - upgrade for Java" and its tools are only available for GitHub Copilot "Pro", "Pro+", "Business" and "Enterprise" plans.
+2025-10-02T16:26:15.818Z [ERROR] [Tool.invoke] error occurs when invoking tool list_jdks: UserError: "GitHub Copilot app modernization - upgrade for Java" and its tools are only available for GitHub Copilot "Pro", "Pro+", "Business" and "Enterprise" plans.. Please upgrade your GitHub Copilot plan to use this feature or upgrading this project using other tools you prefer..
+2025-10-02T16:26:15.822Z [INFO] [Task.complete](): Completing task toolCall
+2025-10-02T16:26:15.823Z [INFO] ----------------------invoked list_jdks----------------------
+2025-10-02T16:26:15.831Z [INFO] [Task.complete](): Completed task toolCall
